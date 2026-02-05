@@ -1,13 +1,19 @@
 # 🤖 II-Telegram-Agent
 
-**Your personal AI assistant on Telegram, powered by II-Agent technology**
+**Your personal AI assistant on Telegram, with a soul and memory**
 
-Run your own AI assistant that you can chat with via Telegram. It combines the best features of [OpenClaw](https://github.com/openclaw/openclaw)'s gateway design with [II-Agent](https://github.com/Intelligent-Internet/ii-agent)'s powerful AI capabilities.
+Run your own AI assistant that you can chat with via Telegram. It combines the best features of [OpenClaw](https://github.com/openclaw/openclaw)'s personality system with [II-Agent](https://github.com/Intelligent-Internet/ii-agent)'s powerful AI capabilities.
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.10+-blue.svg)
 
 ## ✨ Features
+
+### 🧠 Soul & Memory System (Like OpenClaw)
+- 🎭 **Customizable Personality**: Define your assistant's communication style
+- 📝 **Long-Term Memory**: Remembers important information across conversations
+- 👤 **User Profile**: Knows who you are and your preferences
+- 🔄 **Persistent Context**: Never forgets what you've discussed
 
 ### From OpenClaw
 - 🔐 **Security First**: User allowlists, pairing codes, rate limiting
@@ -29,33 +35,45 @@ Run your own AI assistant that you can chat with via Telegram. It combines the b
 - 🔌 **API Keys**: Bring your own LLM API keys
 - 📈 **Usage Tracking**: Monitor your AI usage
 
-## 🚀 Quick Start
+## 🚀 One-Line Installation
 
-### Prerequisites
+The easiest way to get started - just run this command and follow the interactive wizard:
 
-- Python 3.10+ (or Docker)
-- A Telegram Bot Token (from [@BotFather](https://t.me/BotFather))
-- At least one LLM API key (Anthropic, OpenAI, or Google)
+```bash
+curl -fsSL https://raw.githubusercontent.com/Jack-Batman/ii-telegram-agent/main/install.sh | bash
+```
 
-### Option 1: Docker (Recommended)
+The installer will:
+1. ✅ Check and install dependencies
+2. 🤖 Guide you through creating a Telegram bot
+3. 🔑 Set up your AI provider (Claude, GPT, Gemini, or OpenRouter)
+4. 👤 Create your user profile
+5. 🎭 Customize your assistant's personality
+6. 🚀 Start your bot automatically
+
+**No .env file editing required!**
+
+---
+
+## 📦 Alternative Installation Methods
+
+### Option 1: Docker (For Experienced Users)
 
 ```bash
 # Clone the repository
 git clone https://github.com/Jack-Batman/ii-telegram-agent.git
 cd ii-telegram-agent
 
-# Copy and edit the environment file
+# Run the interactive installer
+./install.sh
+
+# Or manually with Docker Compose
 cp .env.example .env
 nano .env  # Add your tokens and API keys
-
-# Start with Docker Compose
 docker-compose up -d
-
-# View logs
-docker-compose logs -f
 ```
 
-### Option 2: Local Installation
+### Option 2: Manual Installation
 
 ```bash
 # Clone the repository
@@ -69,15 +87,58 @@ source venv/bin/activate  # or `venv\Scripts\activate` on Windows
 # Install dependencies
 pip install -e .
 
-# Initialize (creates .env and data directory)
+# Run the interactive setup
+./install.sh
+
+# Or initialize manually
 ii-telegram init
-
-# Edit .env with your tokens
-nano .env
-
-# Start the bot
+nano .env  # Add your tokens
 ii-telegram serve
 ```
+
+---
+
+## 🎭 Soul & Memory System
+
+What makes this bot special is its **soul and memory** - just like OpenClaw!
+
+### Configuration Files
+
+After installation, you'll find these files in your workspace:
+
+| File | Purpose |
+|------|---------||
+| `SOUL.md` | Your assistant's personality, communication style, and values |
+| `USER.md` | Information about you - name, timezone, goals, preferences |
+| `MEMORY.md` | Long-term memory that persists across conversations |
+| `AGENTS.md` | Tool capabilities and configuration |
+
+### Customizing Your Assistant
+
+**Edit `SOUL.md`** to change how your assistant communicates:
+
+```markdown
+## Personality
+My core traits are: witty, insightful, always ready with a clever observation
+
+## Communication Style
+- I use humor to make complex topics accessible
+- I'm direct but never rude
+- I occasionally reference pop culture when relevant
+```
+
+**Edit `USER.md`** to help your assistant know you:
+
+```markdown
+## Identity
+- **Name**: Alex
+- **Timezone**: America/New_York
+
+## Goals & Priorities
+Building a startup, learning machine learning, staying healthy
+```
+
+Your assistant will automatically use this context in conversations!
 
 ## 📱 Using Your Bot
 
@@ -94,6 +155,9 @@ ii-telegram serve
 | `/clear` | Clear conversation history |
 | `/model [name]` | View or change AI model |
 | `/status` | Show system status |
+| `/remember [text]` | Save something to memory |
+| `/forget` | Clear conversation (keeps long-term memory) |
+| `/soul` | Show current personality settings |
 
 ### Approving Users
 
@@ -115,7 +179,7 @@ curl -X POST http://localhost:8080/api/pair/approve \
 ### Environment Variables
 
 | Variable | Description | Default |
-|----------|-------------|----------|
+|----------|-------------|---------||
 | `TELEGRAM_BOT_TOKEN` | Telegram bot token (required) | - |
 | `ANTHROPIC_API_KEY` | Anthropic API key | - |
 | `OPENAI_API_KEY` | OpenAI API key | - |
@@ -233,8 +297,26 @@ mypy src/
                     │  (SQLite/   │     │  - Web Search   │
                     │   Postgres) │     │  - Browser      │
                     └─────────────┘     │  - Code Exec    │
+                                        │  - Remember     │
+                                        │  - Recall       │
+                                        └─────────────────┘
+                                               │
+                                               ▼
+                                        ┌─────────────────┐
+                                        │  Workspace      │
+                                        │  - SOUL.md      │
+                                        │  - USER.md      │
+                                        │  - MEMORY.md    │
                                         └─────────────────┘
 ```
+
+### How Memory Works
+
+1. **SOUL.md** → Loaded at startup to define the system prompt
+2. **USER.md** → Added to context so the assistant knows who you are
+3. **MEMORY.md** → Searched and updated during conversations
+4. **Remember Tool** → AI can save important information
+5. **Recall Tool** → AI can search through saved memories
 
 ## 🔒 Security
 
