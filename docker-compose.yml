@@ -1,0 +1,89 @@
+# II-Telegram-Agent Docker Compose
+# Easy deployment for small PCs, NUCs, or any Linux server
+
+version: '3.8'
+
+services:
+  bot:
+    build: .
+    container_name: ii-telegram-agent
+    restart: unless-stopped
+    ports:
+      - "${PORT:-8080}:8080"
+    environment:
+      # Telegram
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TELEGRAM_WEBHOOK_URL=${TELEGRAM_WEBHOOK_URL:-}
+      - TELEGRAM_WEBHOOK_SECRET=${TELEGRAM_WEBHOOK_SECRET:-}
+
+      # LLM Providers
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY:-}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
+
+      # Default Model
+      - DEFAULT_PROVIDER=${DEFAULT_PROVIDER:-anthropic}
+      - DEFAULT_MODEL=${DEFAULT_MODEL:-claude-sonnet-4-20250514}
+
+      # Tools
+      - TAVILY_API_KEY=${TAVILY_API_KEY:-}
+      - E2B_API_KEY=${E2B_API_KEY:-}
+
+      # Security
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-changeme}
+      - PAIRING_ENABLED=${PAIRING_ENABLED:-true}
+      - ALLOWED_USERS=${ALLOWED_USERS:-}
+      - RATE_LIMIT_MESSAGES=${RATE_LIMIT_MESSAGES:-30}
+
+      # Database
+      - DATABASE_URL=sqlite+aiosqlite:///./data/agent.db
+
+      # Redis (optional)
+      - REDIS_URL=${REDIS_URL:-}
+    volumes:
+      - ./data:/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Optional: Redis for rate limiting and caching
+  redis:
+    image: redis:7-alpine
+    container_name: ii-telegram-redis
+    restart: unless-stopped
+    profiles:
+      - with-redis
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Optional: PostgreSQL for production database
+  postgres:
+    image: postgres:16-alpine
+    container_name: ii-telegram-postgres
+    restart: unless-stopped
+    profiles:
+      - with-postgres
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-iitelegram}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme}
+      - POSTGRES_DB=${POSTGRES_DB:-iitelegram}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-iitelegram}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  redis-data:
+  postgres-data:
