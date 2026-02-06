@@ -1,172 +1,122 @@
-# II-Telegram-Agent Features
+# Features Deep Dive
 
-A comprehensive comparison of features inherited from OpenClaw and II-Agent, plus unique features.
+## Architecture Overview
 
-## Feature Comparison
+II-Telegram-Agent combines the best of two worlds:
 
-| Feature | OpenClaw | II-Agent | II-Telegram-Agent |
-|---------|----------|----------|-------------------|
-| Telegram Integration | \u2705 | \u274c | \u2705 |
-| WhatsApp Integration | \u2705 | \u274c | \ud83d\udd1c (Planned) |
-| Discord Integration | \u2705 | \u274c | \ud83d\udd1c (Planned) |
-| Multi-Model Support | \u2705 | \u2705 | \u2705 |
-| Web Search | \u2705 | \u2705 | \u2705 |
-| Browser Control | \u2705 | \u2705 | \u2705 |
-| Code Execution | \u2705 | \u2705 | \u2705 |
-| Deep Research | \u274c | \u2705 | \u2705 |
-| User Pairing | \u2705 | \u274c | \u2705 |
-| Rate Limiting | \u2705 | \u2705 | \u2705 |
-| Session Management | \u2705 | \u2705 | \u2705 |
-| Self-Hosted | \u2705 | \u2705 | \u2705 |
-| Docker Support | \u2705 | \u2705 | \u2705 |
-| Small PC Optimized | \u274c | \u274c | \u2705 |
-| API Dashboard | \u2705 | \u2705 | \u2705 |
+- **OpenClaw's** soul/memory personality system, heartbeat proactivity, exec-approval security, and multi-channel architecture
+- **II-Agent's** powerful multi-model LLM support, deep research tools, code execution, and extensible tool system
 
-## Detailed Feature Breakdown
-
-### \ud83d\udd10 Security Features (from OpenClaw)
-
-#### User Allowlist
-Restrict bot access to specific Telegram users:
-```bash
-ALLOWED_USERS=123456789,987654321,username1
+```
+                    ┌──────────────────────────────────────────┐
+                    │              Channel Layer                │
+                    │  ┌──────────┐ ┌─────────┐ ┌──────────┐  │
+                    │  │ Telegram │ │ Discord │ │ WhatsApp │  │
+                    │  └────┬─────┘ └────┬────┘ └────┬─────┘  │
+                    │       └───────┬────┘           │         │
+                    └───────────────┼────────────────┘         │
+                                    ▼                          │
+┌──────────────┐    ┌──────────────────────────────┐          │
+│  SOUL.md     │───▶│         Agent Core            │◀─────────┘
+│  USER.md     │    │  ┌─────────────────────┐     │
+│  MEMORY.md   │───▶│  │ Conversation Engine │     │
+└──────────────┘    │  │ + Compaction        │     │
+                    │  └─────────┬───────────┘     │
+                    │            │                  │
+                    │  ┌─────────▼───────────┐     │
+                    │  │   LLM Router        │     │
+                    │  │  Claude│GPT│Gemini   │     │
+                    │  └─────────┬───────────┘     │
+                    │            │                  │
+                    │  ┌─────────▼───────────┐     │
+                    │  │   Tool Registry     │     │
+                    │  │  + Exec Approval    │     │
+                    │  └─────────────────────┘     │
+                    └──────────────────────────────┘
+                                │
+        ┌───────────┬───────────┼───────────┬───────────┐
+        ▼           ▼           ▼           ▼           ▼
+   ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐
+   │Web Search│ │ Browser │ │  Code   │ │  Shell  │ │  Email  │
+   │ +Tavily │ │+Crawling│ │  Exec   │ │ +Approve│ │+Calendar│
+   └─────────┘ └─────────┘ └─────────┘ └─────────┘ └─────────┘
 ```
 
-#### Pairing Mode
-New users get a pairing code that must be approved:
-```
-User: /start
-Bot: \ud83d\udd10 Pairing Required. Your code: ABC123
-Admin: ii-telegram pair approve ABC123
-```
+## From OpenClaw
 
-#### Rate Limiting
-Prevent abuse with configurable message limits:
-```bash
-RATE_LIMIT_MESSAGES=30  # per minute per user
-```
+### Soul & Memory System
+- **SOUL.md**: Defines personality, communication style, values, and boundaries
+- **USER.md**: Stores user profile info (name, timezone, goals, preferences)
+- **MEMORY.md**: Long-term memory that persists across conversations
+- **AGENTS.md**: Tool capabilities and configuration
 
-### \ud83e\udde0 AI Capabilities (from II-Agent)
+### Heartbeat Proactive System
+- Periodic check-ins during configurable active hours
+- Monitors inbox, calendar, and custom triggers
+- Sends proactive messages via Telegram when tasks fire
+- Daily briefing feature with weather, calendar, and news
 
-#### Multi-Model Support
-Switch between AI providers seamlessly:
-- **Anthropic**: Claude Sonnet 4, Claude Opus 4
-- **OpenAI**: GPT-4o, GPT-4o-mini
-- **Google**: Gemini 2.0 Flash, Gemini Pro
-- **OpenRouter**: Access to 100+ models
+### Exec-Approval Security
+- Tools classified by risk level: Safe, Moderate, Dangerous
+- Safe tools (search, browse) execute immediately
+- Dangerous tools (shell, file write, email send) require `/approve` in chat
+- 5-minute approval timeout with clear formatting
 
-#### Tool System
-Extensible tools for enhanced capabilities:
+### Multi-Channel Architecture
+- Abstract `BaseChannel` plugin system
+- Telegram is primary, but architecture supports WhatsApp, Discord, Slack, Signal
+- Platform-agnostic `ChannelMessage` format
+- `ChannelRegistry` for managing multiple connected platforms
 
-1. **Web Search** (`web_search`)
-   - Uses Tavily or DuckDuckGo
-   - Returns structured results with snippets
+## From II-Agent
 
-2. **Browser** (`browse_webpage`)
-   - Fetches and extracts web page content
-   - Removes navigation, ads, etc.
+### Multi-Model LLM Support
+- **Anthropic Claude** (native SDK with tool use)
+- **OpenAI GPT** (native SDK with function calling)
+- **Google Gemini** (native SDK - not just OpenAI-compatible shim)
+- **OpenRouter** (access to 100+ models via OpenAI-compatible API)
+- Per-user model preferences via `/model` command
 
-3. **Code Execution** (`execute_code`)
-   - Runs Python code in sandboxes
-   - Supports E2B or local execution
+### Powerful Tool System
+- **Web Search**: Tavily API or DuckDuckGo fallback
+- **Browser**: HTTP-based page reading with content extraction
+- **Code Execution**: Python sandbox (E2B cloud or local subprocess)
+- **File Operations**: Safe workspace-confined file management
+- **Shell Commands**: Allowlisted commands with security controls
+- **Calendar**: Google Calendar integration
+- **Email**: Gmail integration for inbox triage
+- **Scheduler**: Cron jobs, reminders, daily briefings
+- **Remember/Recall**: AI-managed long-term memory
 
-### \ud83d\udcac Telegram Integration
-
-#### Bot Commands
-| Command | Description |
-|---------|-------------|
-| `/start` | Initialize or restart |
-| `/help` | Show help message |
-| `/clear` | Clear conversation history |
-| `/model [name]` | View or change AI model |
-| `/status` | Show system status |
-
-#### Message Handling
-- Long messages auto-chunked
-- Markdown formatting support
-- Typing indicators
-- Error handling with user-friendly messages
-
-### \ud83d\udcca Session Management
-
-#### Per-User Sessions
-- Each user gets isolated conversation context
-- Configurable session timeout
-- Context window management
-
-#### Conversation Persistence
-- Messages stored in SQLite/PostgreSQL
-- Survives bot restarts
-- Automatic context truncation
-
-### \ud83d\udda5\ufe0f Deployment Options
-
-#### Docker Compose
-```yaml
-# One command to start everything
-docker compose up -d
-```
-
-#### Systemd Service
-```bash
-# Auto-start on boot
-sudo systemctl enable ii-telegram-agent
-```
-
-#### Small PC Optimized
-- Works on Raspberry Pi 5 (8GB)
-- Works on Intel NUC
-- Works on any mini PC
-
-### \ud83d\udd0c API Endpoints
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/` | GET | Admin dashboard |
-| `/api/health` | GET | Health check |
-| `/api/stats` | GET | Usage statistics |
-| `/api/users` | GET | List all users |
-| `/api/pair/approve` | POST | Approve pairing |
-| `/webhook/telegram` | POST | Telegram webhook |
-
-### \ud83d\udcc8 Monitoring & Stats
-
-Track usage via the API:
-```json
-{
-  "users": 10,
-  "sessions": 45,
-  "messages": 1250
-}
-```
+### Self-Improvement Skills
+- Agent can write new tools for itself using `write_skill`
+- Custom skills stored in `~/.ii-agent/skills/`
+- Auto-discovery and loading of user-created skills
 
 ## Unique Features
 
-### 1. Bring Your Own Keys
-Users can use their own API keys without sharing with the bot admin.
+### Conversation Compaction
+- Adaptive context summarization when conversations grow large
+- Preserves key facts, tool results, and user information
+- Progressive fallback if LLM summarization fails
+- Token-aware with configurable thresholds
 
-### 2. Per-User Model Selection
-Each user can select their preferred AI model:
-```
-/model claude-opus-4-20250514
-```
+### Voice Messages
+- Speech-to-text via OpenAI Whisper
+- Text-to-speech via OpenAI TTS or Edge TTS (free fallback)
+- Telegram voice message handling built-in
 
-### 3. Small PC First
-Optimized for low-power devices:
-- Efficient resource usage
-- SQLite by default (no separate DB server)
+### Security Model
+- User allowlists and pairing codes
+- Rate limiting per user
+- Exec-approval for dangerous operations
+- Workspace-confined file operations
+- Shell command allowlisting
+- Admin API with bearer token auth
+
+### Deployment
+- Docker + Docker Compose support
+- Interactive installer script
+- Small PC optimized (Raspberry Pi 5, Intel NUC)
+- SQLite or PostgreSQL database
 - Optional Redis for caching
-
-### 4. Easy Migration from OpenClaw
-Similar configuration style and concepts make migration straightforward.
-
-## Roadmap
-
-- [ ] WhatsApp integration
-- [ ] Discord integration
-- [ ] Voice message support
-- [ ] Image generation
-- [ ] File handling
-- [ ] User-provided API keys UI
-- [ ] Usage billing/limits
-- [ ] Multi-language support

@@ -92,6 +92,17 @@ class Settings(BaseSettings):
     enable_code_execution: bool = True
     enable_file_operations: bool = True
     enable_voice: bool = False
+    enable_exec_approval: bool = True
+    enable_heartbeat: bool = True
+
+    # Voice settings
+    tts_model: str = Field(default="tts-1", description="OpenAI TTS model")
+    tts_voice: str = Field(default="nova", description="TTS voice name")
+
+    # Heartbeat settings
+    heartbeat_interval_minutes: int = Field(default=30, description="Heartbeat check interval")
+    heartbeat_active_hours_start: int = Field(default=8, description="Heartbeat active hours start")
+    heartbeat_active_hours_end: int = Field(default=22, description="Heartbeat active hours end")
 
     @field_validator("allowed_users", mode="before")
     @classmethod
@@ -119,7 +130,7 @@ class Settings(BaseSettings):
         model_map = {
             "anthropic": "claude-sonnet-4-20250514",
             "openai": "gpt-4o",
-            "google": "gemini-2.0-flash",
+            "google": "gemini-2.5-flash",
             "openrouter": "anthropic/claude-sonnet-4",
         }
 
