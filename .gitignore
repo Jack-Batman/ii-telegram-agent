@@ -48,3 +48,24 @@ logs/
 # OS
 .DS_Store
 Thumbs.db
+
+# Workspace files (user-specific)
+workspace/
+SOUL.md
+USER.md
+MEMORY.md
+HEARTBEAT.md
+scheduled_tasks.json
+reminders.json
+
+# Skills (user-generated)
+skills/
+
+# Supervisor/PM2
+supervisord.pid
+supervisor.sock
+supervisord.log
+
+# Alembic
+alembic/versions/*.py
+!alembic/versions/.gitkeep

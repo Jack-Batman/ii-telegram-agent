@@ -1,6 +1,6 @@
 [project]
 name = "ii-telegram-agent"
-version = "1.0.0"
+version = "1.1.0"
 description = "AI Assistant for Telegram powered by II-Agent - Your own personal AI that runs on your hardware"
 readme = "README.md"
 license = { text = "MIT" }
@@ -49,6 +49,8 @@ dependencies = [
     "tenacity>=9.0.0",
     "tiktoken>=0.8.0",
     "redis>=5.2.0",
+    "croniter>=3.0.0",
+    "edge-tts>=6.1.0",
 ]
 
 [project.optional-dependencies]
@@ -59,6 +61,17 @@ dev = [
     "ruff>=0.8.0",
     "mypy>=1.13.0",
     "pre-commit>=4.0.0",
+]
+google = [
+    "google-generativeai>=0.8.0",
+    "google-auth-oauthlib>=1.2.0",
+    "google-api-python-client>=2.100.0",
+]
+voice = [
+    "edge-tts>=6.1.0",
+]
+all = [
+    "ii-telegram-agent[google,voice]",
 ]
 
 [project.scripts]
